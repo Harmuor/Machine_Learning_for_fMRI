@@ -1,0 +1,465 @@
+---
+title: "manuscript 3"
+author: "程诚柏然"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    toc: true
+    toc_float: true
+---
+
+# 声明
+
+本次课程如果按照大纲应该是特征选择和预处理，但是老师临时选择了更换教学顺序，原因是特征选取的方法取决于我们使用的模型，所以这节课先教我们不同的模型有利于我们更好理解特征选取；同时据培训老师说，即使这节课没有接触特征选择我们也能听得懂。
+
+本次手稿仅针对操作课期间的一些本人认为重要需要记下来的细节。更多的理论知识见课程课件。
+
+机器学习步骤：
+
+1. 提出问题
+2. 理解数据
+3. 特征提取
+4. 建构模型
+5. 模型解释
+
+由于spyder总是蜜汁调用numpy失败，找不到特定路径，这次的IDE干脆换成了VC code。`Shift + Enter`选则特定行代码运行。
+
+这里还有我对基础知识的查阅：
+
+>想象你在玩一个视频游戏，你控制着一个角色。
+>
+>参数就像是你在游戏中给角色的命令。比如，当你按下跳跃按钮时，你其实是在告诉游戏：“现在跳！”这个“跳”就是一个参数。
+>
+>属性就像是你的游戏角色的特点。比如，角色可能穿着红色的衣服，有10点生命值。这些就是角色的属性，它们描述了角色是什么样的。
+>
+>所以，参数是你在玩游戏时给出的命令，而属性是你的角色固有的特点。参数是我们用来改动的；属性是我们去静观的。
+
+***
+
+# 导入包
+
+本次课程是实践一次机器学习，这一步我们要调用的包有`numpy`、`matplotlib.pyplot`以及`scikit_learn`。所以说啊，就是导入，这里需要再卷一次spyder，前前后后忙了那么多，到最后跟我说numpy找不到，别人都找得到就他找不到。
+
+```
+#这些可以不用操作，之后那个才是正儿八经导入包
+import numpy as np
+import matplotlib.pyplot as plt
+import sklearn   ###这个其实就是scikit_learn包
+
+```
+
+<p>
+
+`numpy`用来帮我们矩阵运算、`matplotlib`帮我们偶然画图来着、`scikit_learn`是机器学习的主要包。
+
+首先我们刚说过导入库，而这个阶段在实践中，我们未必像刚刚那样大粗大放地导入东西，而是只需要从某个库里的特定模块导入我们所需要特定使用的一个类。具体这仨玩意的解释可以看：
+
+>类就像是食谱。食谱上有制作某种菜肴所需的原料和步骤（不同功能的函数语句和不同的具体命令类型）。在编程中，类就是创建对象（比如程序中的一个按钮或者一只小狗）的食谱。
+>
+>模块就像是厨房的抽屉。每个抽屉里放着不同的工具和器具，你可以打开一个抽屉拿出你需要的东西。在编程中，模块是一个包含一堆函数和类的文件，你可以随时调用。
+>
+>库就像是整个厨房。厨房里有各种各样的抽屉和柜子（模块），里面装满了各种烹饪工具（函数和类），比如调料和米面肯定不在同一个柜子或抽屉里，你可以用它们来做出各种美味的菜肴。
+>
+>其实你把厨房换成车间也能理解，简而言之，类是对象的模板，模块是代码的容器，库是模块的集合。这些都是为了让代码更加有组织，易于管理和重用。
+
+再回到正题，这里类似于导入库，不过这一步我们可能比普通导入库做得更细致、也更省算力，就是只将需要用到的类导进来：
+
+```
+import numpy as np
+from sklearn.linear_model import LinearRegression   #这里就是导入了一个名字为LinearRegression的类
+```
+
+<p>
+
+***
+
+# 线性回归 Linear Regression
+
+本次实战我们需要使用`scikit_learn`系列中的线性回归模型，因而我们首先需要对这个模型的python函数进行调用（函数所属**类**的学名是`sklearn.linear_model.LinearRegression`），这里老师同样贴出函数[文档](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html "官方文档网址")建议各位学会去阅读。同时这里附上该模型的一些基础知识，详见课件和培训视频（进度条`10:42`处）：
+
+- 回归模型
+- 损失函数（均方误差）
+- 梯度下降
+  - 权重（weight, w）；偏差（bias, b）。
+  - 学习率（Learn Rate, LR）决定步长（step）
+  - 达到局部最优（Loss函数极小值）
+- 过拟合
+
+## 初始化模型
+
+这一步其实就是一方面选择使用哪个模型；另一方面在即将开始之前把模型里一些参数给设置好（比如算不算截距、要不要标准化等），具体参数需要我们去阅读使用文档。
+
+```
+#这里我们命名了一个变量，这个变量的值为LinearRegression类的结果，这里我们采用了参数默认值
+our_model = LinearRegression(fit_intercept = T, 
+                                normalize = F)
+
+
+#上面说到采用的是参数默认水平，其实这样的话那俩参数我们省略不写也是一样的（默认水平）：
+also_our_model = LinearRegression()
+
+```
+
+<p>
+
+##准备数据、特征提取以及特征选择
+
+声明：由于本节课进行了课程顺序变换，这一节的内容我们将在后一节详细说明，这里再培训中也是被暂时性跳过了正儿八经的加载数据啥的。但是培训允许我们使用先做出来的数据代替正牌作为我们的数据、样本和特征以及标签：
+
+```
+train_data1 = np.array([[1,1], [1,2], [2,2], [2,3]])   #生成一个用于train的数据集，4个样本（4个中括号），每个样本俩特征（每个中括号里俩数）
+
+
+train_label1 = np.dot(train_data, np.array([1,2])) + 3.14 + 2*np.random.rand(len(train_data))   #四个样本对应的标签
+```
+
+<p>
+
+同时注意因为这次弄的是回归模型，train_label使用的是**连续值**。
+
+## 训练模型
+
+这里其实培训老师也是现去翻[说明文档](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html "官方文档网址")。更是体现了会看文档的重要性！
+
+```
+my_model.fit(train_data1, train_label1)   #这里必须要写的就是训练集的特征和标签
+```
+
+## 测试模型
+
+这里同样我们先使用现做的数据作为测试集：
+
+```
+test_data1 = np.array([[2,1], [3,3]])
+
+test_label1 = np.dot(test_data, np.array([1,2])) + 3.14 +2*np.random.rand(len(test_data))
+```
+
+<p>
+
+然后我们就用训练完的模型去测试测试呗：
+
+```
+#该模型我们用score参数去测量，输出结果是R方
+R_2 = my_model.score(test_data1, test_label1)
+
+
+#测试返回结果为R2，我们就打印出来看看
+print('R2', R_2)
+```
+
+## 模型解释
+
+其实就是去看模型的效应量或者说我们线性回归的权重（weight，W），coefficient，即`coef`，这个是`LinearRegression`类的一个**属性**，培训视频里有提，<font color=red>**属性是我们`fit`（拟合）模型之后才能够去查看的**</font>。不过我们可以注意到，之前我们使用参数函数的时候，比如`np.array([[2,1], [3,3]])`，这后面跟的都是**括号**，但是**这里我们查看属性`coef`的时候，后面跟的都是`_`**。这里是属性和参数函数在实务中的一细节差异，需要注意。
+
+```
+weight = my_model.coef_
+
+print(weight)
+```
+
+<p>
+
+虽然我们得到了一个权重coef，可是它啥意思呢？它的返回数值是每个特征对数值变异的**贡献程度**。我们用这些来解释模型的效用力或者说模型的解释力R方。
+
+不仅我们可以算出权重weight，也可以查出线性回归的截距，而截距的解释性就没有权重那么强了，个人看课件理解这个可能一定程度上反映了偏差bias。在程序中我们可以使用属性`intercept`查看：
+
+```
+bias1 = my_model.intercept_
+
+print(bias1)
+```
+
+## 得到未经测试的预测结果
+
+有时候我们会希望模型对一些数据做一些预测，通知我们需要知道预测的结果，那么，这个时候我们便需要通过`predict`命令来实现这些需求：
+
+```
+#假如我们只对测试集的数据（test_data1）进行预测
+predict_label1 = my_model.predict
+
+print(predict_label1)
+```
+
+## 此节总结
+
+以上就是一场最简单的机器学习，没有划分验证集也没有调参，之后我们在这个基础上慢慢深入。以下是这次我们干的事情的总结：
+
+||步骤|标志代码|
+|---|---|---|
+||准备线性模型|`LinearRegression()`|
+||训练/拟合模型|`fit(train_data, train_label)`|
+||测试模型|`score(test_data, test_label)`|
+||解释模型|`coef_`|
+||获得截距（如果设置去算了）|`intercept_`|
+||模型预测|`predict(data)`|
+
+***
+
+# 逻辑回归 Logistic Regression
+
+逻辑回归是在线性回归的基础上加一个**sigmoid函数（非线性）**映射。是一种常用的**二**分类算法，能分析非线性的问题（这个是普通线性回归没法做的），解释性比较好且拟合性质比较好。sigmoid函数值域为[0,1]，我们可以将之看作概率（PP），同时我们还可以给这个概率设定一个阈值，这个阈值可以帮助我们可到分类结果。比如，当我们设定阈值为0.5，那么如果一个data对应的P>0.5，则分类为正样本；对应的P<0.5，则分类为负样本。
+
+对应的损失函数为交叉熵，详情看培训视频（进度条`1:50:56`处）和课件。
+
+逻辑回归在0附近敏感、远离0则不那么敏感，这使得模型更加关注分类边界，增加鲁棒性。
+
+过拟合的解决方案--正则化（培训`1:54:45`处）：给原Loss函数加上另一个关于w和b的函数：
+
+- L1正则化：使某些权重为0，|w|使整体Loss函数变小，方便提取无用特征
+- L2正则化：使权重平滑，w平方和越小Loss越平滑
+
+逻辑回归模型的[使用文档](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html "点击进入")
+
+## 导入包
+
+这里其实框架上和线性回归类似：训练拟合、测试、解释以及预测等等，不过还是存在一些部分的操作差异。这里我们首先导入需要的包：
+
+```
+import numpy as np
+from sklearn.linear_model import LogisticRegression   #导入模型所在的类
+from sklearn.model_selection import train_test_split   #这个类用于划分数据集
+
+```
+
+## 加载数据
+
+这里其实我们可以选择包自带的实例数据，按照培训讲解，这里直接抄就可以，现在先不用管啥是啥：
+
+```
+from sklearn.datasets import load_breast_cancer   #导入数据集的包
+cancer_data = load_breast_cancer()
+data = cancer_data['data']   #569个样本，每个样本30个维度，即30个特征
+label = cancer_data['target']   #569个label
+```
+
+<p>
+
+这里我们需要增加一个划分（拆分）数据的过程，也就是划分训练集和测试集，需要使用`train_test_split()`函数实现功能，假如我们随机划分20%的数据为测试集：
+
+```
+train_data2, test_data2, train_label2, test_label2 = train_test_split(data,
+                                                                  label, 
+                                                                  test_size=0.2,    #随机划分20%数据给测试集
+                                                                  random_state=42)  #是否保证每次划分的结果一致
+```
+
+<p>
+
+这里需要说明的是，设置`random_state=42`，无论你调用这个函数多少次，只要数据集不变，分割出来的训练集和测试集都会是完全相同的。所以，如果你想要在不同的运行中得到可复现的结果，就应该使用`random_state`参数，不然每次都随机划分一篇混沌了。这个参数不仅仅这里需要规定一次，**在后面的模型初始化中也得规定一次**才能真正实现结果一致的效果。
+
+## 初始化模型
+
+相比于刚刚的实务操作，这里我们针对逻辑回归模型的初始化需要增加几个参数的调整：
+
+```
+also_my_model = LogisticRegression(random_state=42,  #再设置一次保证结果重复性
+                                   penalty='l2',  #选择l2（默认）的正则化方式
+                                   C=1)   #这个数字越小，正则化效果越强
+
+```
+
+<p>
+
+`C`参数补充说明：
+
+- 正则化帮助模型不要过于复杂，避免过拟合。`C`参数的值决定了你想给模型多少“自由度”。如果C的值较**小**，意味着你想让正则化更**强**，这样模型就不会过于复杂，它会更多地忽略噪声，从而可能得到一个更简单但泛化能力更强的模型。但是，如果`C`的值太小，可能会导致模型过于简单，从而忽略了数据中的重要特征，这就是所谓的欠拟合。
+
+- 相反，如果`C`的值较大，意味着你给模型更多的自由度，让它尽可能地拟合训练数据，即使这意味着模型会变得更复杂。这在数据中**几乎没有噪声时是有用的**，因为模型可以尽可能地从数据中学习。但是，如果`C`的值太大，模型可能会过于复杂，导致过拟合。
+
+## 拟合模型
+
+和之前线性回归的步骤类似，一样是使用`fit()`函数实现：
+
+```
+also_my_model.fit(tran_data2, train_label2)
+```
+
+## 再训练集上评估模型
+
+这里和之前不同，我们追加一部分在训练集上对模型进行一次测试，不过实现功能的函数还是`score()`：
+
+```
+ACC_past = also_my_model.score(train_data2, train_label2)
+print(ACC_past)
+
+```
+
+
+## 评估测试模型
+
+同上，使用`score()`函数实现，不过这里返回给我们的不是R2，而是一个准确率：
+
+```
+ACC_pre = also_my_model.score(test_data2, test_label2)
+print(ACC_pre)
+```
+
+## 只进行分类预测，不计算准确率
+
+这里同之前，预测结果我们仍然是使用`predict()`函数实现
+
+```
+pre_classifying = also_my_model.predict(test_data2)
+print(pre_classifying)
+```
+
+## 查看预测概率
+
+和线性回归不同的是，我们不仅仅可以看到分类的结果，也可以看到预测分类的概率，这个我们可以使用`predict_proba()`函数来实现：
+
+```
+probability = also_my_model.predict_proba(test_data2)
+print(probability)
+```
+
+## 解释模型
+
+这里和之前解释模型一样，我们计算出模型的权重weight，也就是`coef_`：
+
+```
+weight2 = also_my_model.coef_   #注意，coef是属性，后面不跟括号，跟_
+print(weight2)
+```
+
+## 绘制ROC曲线
+
+逻辑回归属于分类模型，而既然是分类模型我们就可以绘制其ROC曲线，不过在绘制之前我们需要先导入俩包：
+
+```
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+```
+
+<p>
+
+在导入包之后，我们就可以像在`ggplot2`中一样绘图，但是说实话，数据可视化我目前确实非常不在行，这段只能先抄下来以后慢慢参悟了（培训视频2:11:49处）：
+
+```
+y_pre = probability[:,1]   #分类为1的概率
+fpr, tpr, thresholds = roc_curve(test_label2, y_pre)   #先计算fpr、tpr
+roc_auc = auc(fpr, tpr)   #在计算AUC
+plt.plot(fpr, tpr,'r--', label = 'ROC(area = {0:.2f})'.format(roc_auc), lw = 2)   #绘制ROC曲线
+plt.xlim([-0.05,1.05])   #设置x轴上下限
+plt.ylim([-0.05,1.05])   #设置y轴上下限
+plt.xlabel('False Positive Rate')   #x轴标签
+plt.ylabel('True Positive Rate')   #y轴标签
+plt.title('ROC Curve')
+plt.legend(loc = "lower right")
+plt.show()
+
+```
+
+***
+
+# 添加验证集
+
+之前两次例子中，我们分别完成了最简单的分类和回归，但是之前我们说过，现在时兴的做法是将数据集分为训练集、验证集以及测试集三个部分，其中测试集和模型拟合完全不沾边以此更好地保留我们模型的泛化能力。这里培训就带着做了如何在之前的基础上增加验证集。其实也是在`train_test_split()`的时候再增加一行代码（对train数据再细分一次）、评估模型的时候的`score()`函数对验证集再来一遍。这里我们还会加上部分调参的操作。依旧先用刚刚逻辑回归的架子先。先导入一下包加载一下数据：
+
+```
+import numpy as np
+from sklearn.linear_model import LogisticRegression   #导入模型所在的类
+from sklearn.model_selection import train_test_split   #这个类用于划分数据集
+
+
+from sklearn.datasets import load_breast_cancer   #导入数据集的包
+cancer_data = load_breast_cancer()
+data = cancer_data['data']   #569个样本，每个样本30个维度，即30个特征
+label = cancer_data['target']   #569个label
+```
+
+## 再数据划分处的处理
+
+验证集不会平白无故蹦出来，因而需要我们在划分数据的时候就规范好。这里我们在回到那个步骤：
+
+```
+#这里和之前一样，先把数据集划分为训练集和测试集两部分
+train_data, test_data, train_label, test_label = train_test_split(data, label, test_size = 0.1, random_state = 42)
+
+
+#之后就是不一样的地方了，我们接下来把训练集进一步划分成训练集和验证集
+train_x, val_x, train_y, val_y = train_test_split(train_data, train_label, test_size = 0.2, random_state = 42)
+```
+
+<p>
+
+还是那句话，其实就是加了一行数据划分的函数对训练数据再次划分而已。之后就是一样的初始化、拟合、评估。
+
+## 评估模型和调参
+
+这里一样需要先初始化等操作，我们先把对于这节“不那么重要”的部分做了：
+
+```
+#初始化和拟合
+model_too = LogisticRegression(random_state = 42, penalty = 'l2', C = 1)
+model_too.fit(train_x, train_y)
+```
+
+<p>
+
+之后的评估就是一处不一样的地方了，这里和刚刚不同，我们需要关注验证集上的模型评估结果最佳，如果验证集的评估结果逊于训练集，那么为了防止过拟合发送，我们就需要调整一些参数：比如将`penalty=`从l2到l1或者调为none；将`C=`的数值改改大小，总之目的就是将验证集的评估结果变为最佳。
+
+```
+#分别评估验证集和训练集的模型
+ACC_train = model_too.score(train_X, train_y)
+ACC_val = model_too.score(val_x, val_y)
+print(ACC_train)
+print(ACC_val)
+
+#得到结果后我们就根据结果调整之前代码里的参数，直到我们无法再提高验证集评估效果
+```
+
+## 测试和解释模型
+
+当我们调整参数后，保留验证集评估最好的参数组合，用那个参数组合来测试模型：
+
+```
+ACC_test = model_too.score(test_x, test_y)
+print(ACC_test)
+
+
+#同样的假如我们只是想预测测试集的分类和概率：
+test_classifying = model_too.predict(test_x)
+test_probability = model_too.predict_proba(test_x)
+print(test_classifying)
+print(test_probability)
+
+
+#另外，我们也不要忘记解释模型的权重
+weight233 = model_too.coef_
+bias233 = model_too.intercept_
+print(weight233)
+print(bias233)
+
+```
+
+<p>
+
+## 画图
+
+这次我们再用假如验证集后的模型画个ROC，过程差不多，但是其实可以发现这次的ROC要比原来那个不划分验证集的好看
+
+```
+#导入需要的包
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
+
+#开始画图
+y_pre = test_probability[:,1]   #分类为1的概率
+fpr, tpr, thresholds = roc_curve(test_y, y_pre)   #先计算fpr、tpr
+roc_auc = auc(fpr, tpr)   #在计算AUC
+plt.plot(fpr, tpr,'r--', label = 'ROC(area = {0:.2f})'.format(roc_auc), lw = 2)   #绘制ROC曲线
+plt.xlim([-0.05,1.05])   #设置x轴上下限
+plt.ylim([-0.05,1.05])   #设置y轴上下限
+plt.xlabel('False Positive Rate')   #x轴标签
+plt.ylabel('True Positive Rate')   #y轴标签
+plt.title('ROC Curve')
+plt.legend(loc = "lower right")
+plt.show()
+
+```
+
+## 总结
+
+这次我们进行了一次简单的调参，重在感受。但是实际上模型会跑100次1000次，调参不会跟今天一样就手动弄了一次，实际操作中会联系到我们之前说得k折交叉验证，然后调参也要100、1000次，要比今天进行的复杂得多。这也是我们之后要学习的内容。今日仅仅是初步了解模型。
